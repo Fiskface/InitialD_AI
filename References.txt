@@ -6,6 +6,8 @@ https://docs.unity3d.com/Manual/WheelColliderTutorial.html
 https://www.youtube.com/watch?v=tQmxW277dXk Useless, use in sources
 https://www.youtube.com/watch?v=jZk9nUQQpO0 Future video in playlist
 
+https://jeannoelseneque.medium.com/racing-car-game-day-5-wheel-smoke-effect-b5ebd0fb0469 Smoke
+
 AI:
 
 
