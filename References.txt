@@ -3,10 +3,12 @@ https://docs.unity3d.com/Manual/class-WheelCollider.html
 https://docs.unity3d.com/Manual/wheel-colliders-friction.html
 https://docs.unity3d.com/Manual/WheelColliderTutorial.html
 
-https://www.youtube.com/watch?v=tQmxW277dXk
-https://www.youtube.com/watch?v=jZk9nUQQpO0
+https://www.youtube.com/watch?v=tQmxW277dXk Useless, use in sources
+https://www.youtube.com/watch?v=jZk9nUQQpO0 Future video in playlist
 
 AI:
 
 
-https://www.youtube.com/watch?v=l6-YQQrIz14
+
+https://www.youtube.com/watch?v=l6-YQQrIz14 External package
+https://www.youtube.com/watch?v=gEwNHUDc8uE&list=PL0JXhw1odpJLTRBDdv4ybtYkuD1lEcF-N Playlist how to make a car
