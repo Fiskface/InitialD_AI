@@ -14,3 +14,6 @@ AI:
 
 https://www.youtube.com/watch?v=l6-YQQrIz14 External package
 https://www.youtube.com/watch?v=gEwNHUDc8uE&list=PL0JXhw1odpJLTRBDdv4ybtYkuD1lEcF-N Playlist how to make a car
+
+
+https://github.com/yasirkula/UnityBezierSolution Splines?

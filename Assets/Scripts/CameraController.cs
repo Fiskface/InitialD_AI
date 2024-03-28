@@ -16,11 +16,11 @@ public class CameraController : MonoBehaviour
     }
 
     // Update is called once per frame
-    void LateUpdate()
+    void FixedUpdate()
     {
         Vector3 playerForward = (playerRB.velocity + player.transform.forward).normalized;
         transform.position = Vector3.Lerp(transform.position, 
-            player.position + player.transform.TransformVector(offset) + playerForward * (-5f), speed * Time.deltaTime);
+            player.position + player.transform.TransformVector(new Vector3(offset.x, 0, offset.z)) + new Vector3(0, offset.y, 0) + playerForward * (-5f), speed * Time.deltaTime);
         
         transform.LookAt(player);
     }

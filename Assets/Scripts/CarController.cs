@@ -13,6 +13,7 @@ public class CarController : MonoBehaviour
     public AnimationCurve steeringCurve;
     public GameObject smokePrefab;
     public float slipAllowance = 0.05f;
+    public Vector3 centerOfMassOffset;
 
 
     private float _gasInput;
@@ -27,6 +28,7 @@ public class CarController : MonoBehaviour
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        rb.centerOfMass += centerOfMassOffset;
 
         foreach (var wheel in wheels)
         {
@@ -48,6 +50,7 @@ public class CarController : MonoBehaviour
         CheckInput();
 
         float steerHelp = Vector3.SignedAngle(transform.forward, rb.velocity + transform.forward, Vector3.up);
+        steerHelp /= 2;
         if(_gasInput < 0) steerHelp = 0;
 
         foreach (var wheel in wheels)
@@ -68,11 +71,12 @@ public class CarController : MonoBehaviour
 
         if(_slipAngle < 120)
         {
-            if(_gasInput < 0)
+            if (_gasInput < 0)
             {
                 _brakeInput = Mathf.Abs(_gasInput);
                 _gasInput = 0;
             }
+            else _brakeInput = 0;
         }
         else _brakeInput = 0;
     }
@@ -129,10 +133,13 @@ public class Wheel
     {
         coll.GetGroundHit(out WheelHit hit);
 
-        if(Mathf.Abs(hit.sidewaysSlip) + Mathf.Abs(hit.forwardSlip) > slipAllowance)
+        if (Mathf.Abs(hit.sidewaysSlip) * 2 + Mathf.Abs(hit.forwardSlip) / 5 > slipAllowance)
         {
-            smokeParticles.Play();
+            if (!smokeParticles.isPlaying) smokeParticles.Play();
         }
-        else smokeParticles.Stop();
+        else
+        {
+            if(smokeParticles.isPlaying) smokeParticles.Stop();
+        }
     }
 }
