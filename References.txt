@@ -17,3 +17,5 @@ https://www.youtube.com/watch?v=gEwNHUDc8uE&list=PL0JXhw1odpJLTRBDdv4ybtYkuD1lEc
 
 
 https://github.com/yasirkula/UnityBezierSolution Splines?
+
+https://forum.unity.com/threads/the-dark-art-of-unity-wheel-colliders-what-unity-doesnt-tell-you.1109261/ Help me with understeer!!!

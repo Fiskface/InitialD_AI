@@ -19,6 +19,7 @@ public class CarController : MonoBehaviour
     private float _gasInput;
     private float _steerInput;
     private float _brakeInput;
+    private bool _handBrakeInput;
     private float _speed;
     private float _slipAngle;
 
@@ -34,6 +35,7 @@ public class CarController : MonoBehaviour
         {
             wheel.smokeParticles = Instantiate(smokePrefab, wheel.coll.transform.position - wheel.coll.radius / 2 * Vector3.up, 
                 Quaternion.identity, wheel.coll.transform).GetComponent<ParticleSystem>();
+            wheel.Awake();
         }
     }
 
@@ -59,6 +61,7 @@ public class CarController : MonoBehaviour
             wheel.ApplySteering(_steerInput, _speed, steeringCurve, steerHelp);
             wheel.ApplyMotor(_gasInput, motorPower);
             wheel.ApplyBrake(_brakeInput, brakePower);
+            wheel.ApplyHandBrake(_handBrakeInput, brakePower);
             wheel.CheckParticles(slipAllowance);
         }
     }
@@ -68,6 +71,7 @@ public class CarController : MonoBehaviour
         _gasInput = Input.GetAxis("Vertical");
         _steerInput = Input.GetAxis("Horizontal");
         _slipAngle = Vector3.Angle(transform.forward, rb.velocity - transform.forward);
+        _handBrakeInput = Input.GetButton("Fire1");
 
         if(_slipAngle < 120)
         {
@@ -93,6 +97,20 @@ public class Wheel
     public bool motorized;
     public bool frontTyre;
     [NonSerialized] public ParticleSystem smokeParticles;
+
+    private WheelFrictionCurve defaultSidewaysFriction = new WheelFrictionCurve();
+    private WheelFrictionCurve handBrakeSidewaysFriction = new WheelFrictionCurve();
+
+    public void Awake()
+    {
+        defaultSidewaysFriction = coll.sidewaysFriction;
+
+        handBrakeSidewaysFriction.extremumSlip = defaultSidewaysFriction.extremumSlip * 10;
+        handBrakeSidewaysFriction.extremumValue = defaultSidewaysFriction.extremumValue / 2;
+        handBrakeSidewaysFriction.asymptoteSlip = defaultSidewaysFriction.asymptoteSlip;
+        handBrakeSidewaysFriction.asymptoteValue = defaultSidewaysFriction.asymptoteValue;
+        handBrakeSidewaysFriction.stiffness = defaultSidewaysFriction.stiffness;
+    }
 
     public void UpdateWheelMesh()
     {
@@ -127,6 +145,20 @@ public class Wheel
     {
         if(frontTyre) coll.brakeTorque = brakeInput * brakePower * 0.7f;
         else coll.brakeTorque = brakeInput * brakePower * 0.3f;
+    }
+
+    public void ApplyHandBrake(bool handBrakeInput, float brakePower)
+    {
+        if (frontTyre) return;
+        if (!handBrakeInput)
+        {
+            coll.sidewaysFriction = defaultSidewaysFriction;
+            return;
+        }
+
+        coll.sidewaysFriction = handBrakeSidewaysFriction;
+
+        coll.brakeTorque = brakePower * 0.5f;
     }
 
     public void CheckParticles(float slipAllowance)

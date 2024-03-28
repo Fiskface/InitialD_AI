@@ -241,7 +241,7 @@ WheelCollider:
     m_ExtremumValue: 1.5
     m_AsymptoteSlip: 0.5
     m_AsymptoteValue: 0.75
-    m_Stiffness: 0.7
+    m_Stiffness: 1.5
   m_Enabled: 1
 --- !u!1 &296539206
 GameObject:
@@ -918,7 +918,7 @@ WheelCollider:
     m_ExtremumValue: 1.5
     m_AsymptoteSlip: 0.5
     m_AsymptoteValue: 0.75
-    m_Stiffness: 0.7
+    m_Stiffness: 1.5
   m_Enabled: 1
 --- !u!1001 &1952351342
 PrefabInstance:
@@ -7867,12 +7867,12 @@ MonoBehaviour:
       outWeight: 0.29583332
     - serializedVersion: 3
       time: 80
-      value: 15
-      inSlope: -0.0023565292
-      outSlope: -0.0023565292
+      value: 10
+      inSlope: -0.0044845124
+      outSlope: -0.0044845124
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.225
+      inWeight: 0.29583335
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
