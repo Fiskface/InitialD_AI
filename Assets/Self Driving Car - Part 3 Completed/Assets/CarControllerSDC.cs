@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(NNet))]
 public class CarControllerSDC : MonoBehaviour
 {
     private Vector3 startPosition, startRotation;
+    private NNet network;
 
     [Range(-1f,1f)]
     public float a,t;
@@ -17,6 +19,10 @@ public class CarControllerSDC : MonoBehaviour
     public float avgSpeedMultiplier = 0.2f;
     public float sensorMultiplier = 0.1f;
 
+    [Header("Network Options")]
+    public int LAYERS = 1;
+    public int NEURONS = 10;
+
     private Vector3 lastPosition;
     private float totalDistanceTravelled;
     private float avgSpeed;
@@ -26,9 +32,21 @@ public class CarControllerSDC : MonoBehaviour
     private void Awake() {
         startPosition = transform.position;
         startRotation = transform.eulerAngles;
+        network = GetComponent<NNet>();
+
+        
     }
 
+    public void ResetWithNetwork (NNet net)
+    {
+        network = net;
+        Reset();
+    }
+
+    
+
     public void Reset() {
+
         timeSinceStart = 0f;
         totalDistanceTravelled = 0f;
         avgSpeed = 0f;
@@ -38,8 +56,8 @@ public class CarControllerSDC : MonoBehaviour
         transform.eulerAngles = startRotation;
     }
 
-    private void OnCollisionEnter (Collision collision) {
-        Reset();
+    private void OnCollisionEnter(Collision collision) {
+        Death();
     }
 
     private void FixedUpdate() {
@@ -47,7 +65,9 @@ public class CarControllerSDC : MonoBehaviour
         InputSensors();
         lastPosition = transform.position;
 
-        //Neural network code here
+
+        (a, t) = network.RunNetwork(aSensor, bSensor, cSensor);
+
 
         MoveCar(a,t);
 
@@ -61,6 +81,10 @@ public class CarControllerSDC : MonoBehaviour
 
     }
 
+    private void Death()
+    {
+        GameObject.FindObjectOfType<GeneticManager>().Death(overallFitness, network);
+    }
 
     private void CalculateFitness() {
 
@@ -70,12 +94,11 @@ public class CarControllerSDC : MonoBehaviour
        overallFitness = (totalDistanceTravelled*distanceMultipler)+(avgSpeed*avgSpeedMultiplier)+(((aSensor+bSensor+cSensor)/3)*sensorMultiplier);
 
         if (timeSinceStart > 20 && overallFitness < 40) {
-            Reset();
+            Death();
         }
 
         if (overallFitness >= 1000) {
-            //Saves network to a JSON
-            Reset();
+            Death();
         }
 
     }
@@ -89,30 +112,30 @@ public class CarControllerSDC : MonoBehaviour
         Ray r = new Ray(transform.position,a);
         RaycastHit hit;
 
-        if (Physics.Raycast(r, out hit)) {
-            aSensor = hit.distance/20;
-            
+        if (Physics.Raycast(r, out hit))
+        {
+            aSensor = hit.distance / 20;
+            Debug.DrawLine(r.origin, hit.point, Color.red);
         }
 
         r.direction = b;
 
         if (Physics.Raycast(r, out hit)) {
             bSensor = hit.distance/20;
-            
+            Debug.DrawLine(r.origin, hit.point, Color.red);
         }
 
         r.direction = c;
 
         if (Physics.Raycast(r, out hit)) {
             cSensor = hit.distance/20;
-           
+            Debug.DrawLine(r.origin, hit.point, Color.red);
         }
 
     }
 
     private Vector3 inp;
-
-    public void MoveCar (float v, float h) {
+    public void MoveCar(float v, float h) {
         inp = Vector3.Lerp(Vector3.zero,new Vector3(0,0,v*11.4f),0.02f);
         inp = transform.TransformDirection(inp);
         transform.position += inp;
