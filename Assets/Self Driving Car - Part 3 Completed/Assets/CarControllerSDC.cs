@@ -2,16 +2,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(NNet))]
 public class CarControllerSDC : MonoBehaviour
 {
     private Vector3 startPosition, startRotation;
     private NNet network;
+    private GeneticManager geneticManager;
 
     [Range(-1f,1f)]
     public float a,t;
 
     public float timeSinceStart = 0f;
+
+    [Header("Sensors")] 
+    public int raycastAmount;
+    public int angle = 180;
 
     [Header("Fitness")]
     public float overallFitness;
@@ -28,13 +32,15 @@ public class CarControllerSDC : MonoBehaviour
     private float avgSpeed;
 
     private float aSensor,bSensor,cSensor;
+    private float[] inputs;
 
     private void Awake() {
         startPosition = transform.position;
         startRotation = transform.eulerAngles;
-        network = GetComponent<NNet>();
+        geneticManager = GetComponent<GeneticManager>();
 
-        
+        inputs = new float[raycastAmount];
+        NNet.inputs = inputs.Length;
     }
 
     public void ResetWithNetwork (NNet net)
@@ -42,9 +48,7 @@ public class CarControllerSDC : MonoBehaviour
         network = net;
         Reset();
     }
-
     
-
     public void Reset() {
 
         timeSinceStart = 0f;
@@ -60,30 +64,24 @@ public class CarControllerSDC : MonoBehaviour
         Death();
     }
 
-    private void FixedUpdate() {
+    private void FixedUpdate()
+    {
 
         InputSensors();
         lastPosition = transform.position;
-
-
-        (a, t) = network.RunNetwork(aSensor, bSensor, cSensor);
-
-
-        MoveCar(a,t);
+        
+        (a, t) = network.RunNetwork(inputs);
+        
+        MoveCar(a, t);
 
         timeSinceStart += Time.deltaTime;
 
         CalculateFitness();
-
-        //a = 0;
-        //t = 0;
-
-
     }
 
     private void Death()
     {
-        GameObject.FindObjectOfType<GeneticManager>().Death(overallFitness, network);
+        geneticManager.Death(overallFitness, network);
     }
 
     private void CalculateFitness() {
@@ -103,35 +101,27 @@ public class CarControllerSDC : MonoBehaviour
 
     }
 
-    private void InputSensors() {
-
-        Vector3 a = (transform.forward+transform.right);
-        Vector3 b = (transform.forward);
-        Vector3 c = (transform.forward-transform.right);
-
-        Ray r = new Ray(transform.position,a);
-        RaycastHit hit;
-
-        if (Physics.Raycast(r, out hit))
+    private void InputSensors()
+    {
+        var anglePerAmount = angle / (raycastAmount - 1);
+        for (int i = 0; i < raycastAmount; i++)
         {
-            aSensor = hit.distance / 20;
-            Debug.DrawLine(r.origin, hit.point, Color.red);
+            Vector3 direction = Quaternion.AngleAxis(-angle * 0.5f + anglePerAmount * i, Vector3.up) * Vector3.forward;
+            direction = transform.TransformDirection(direction);
+            
+            Ray r = new Ray(transform.position,direction);
+            RaycastHit hit;
+
+            if (Physics.Raycast(r, out hit))
+            {
+                inputs[i] = hit.distance / 20;
+                Debug.DrawLine(r.origin, hit.point, Color.red);
+            }
+            else
+            {
+                inputs[i] = 1;
+            }
         }
-
-        r.direction = b;
-
-        if (Physics.Raycast(r, out hit)) {
-            bSensor = hit.distance/20;
-            Debug.DrawLine(r.origin, hit.point, Color.red);
-        }
-
-        r.direction = c;
-
-        if (Physics.Raycast(r, out hit)) {
-            cSensor = hit.distance/20;
-            Debug.DrawLine(r.origin, hit.point, Color.red);
-        }
-
     }
 
     private Vector3 inp;

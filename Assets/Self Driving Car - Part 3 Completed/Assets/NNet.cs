@@ -4,16 +4,17 @@ using UnityEngine;
 
 using MathNet.Numerics.LinearAlgebra;
 using System;
-
 using Random = UnityEngine.Random;
 
-public class NNet : MonoBehaviour
+public class NNet
 {
-    public Matrix<float> inputLayer = Matrix<float>.Build.Dense(1, 3);
+    public static int inputs = 3;
+    
+    private Matrix<float> inputLayer = Matrix<float>.Build.Dense(1, inputs);
 
-    public List<Matrix<float>> hiddenLayers = new List<Matrix<float>>();
+    private List<Matrix<float>> hiddenLayers = new List<Matrix<float>>();
 
-    public Matrix<float> outputLayer = Matrix<float>.Build.Dense(1, 2);
+    private Matrix<float> outputLayer = Matrix<float>.Build.Dense(1, 2);
 
     public List<Matrix<float>> weights = new List<Matrix<float>>();
 
@@ -61,6 +62,7 @@ public class NNet : MonoBehaviour
     public NNet InitialiseCopy(int hiddenLayerCount, int hiddenNeuronCount)
     {
         NNet n = new NNet();
+        n.inputLayer = Matrix<float>.Build.Dense(inputLayer.RowCount, inputLayer.ColumnCount);
 
         List<Matrix<float>> newWeights = new List<Matrix<float>>();
 
@@ -107,33 +109,27 @@ public class NNet : MonoBehaviour
 
     public void RandomiseWeights()
     {
-
         for (int i = 0; i < weights.Count; i++)
         {
-
             for (int x = 0; x < weights[i].RowCount; x++)
             {
-
                 for (int y = 0; y < weights[i].ColumnCount; y++)
                 {
-
                     weights[i][x, y] = Random.Range(-1f, 1f);
-
                 }
-
             }
-
         }
-
     }
 
-    public (float, float) RunNetwork(float a, float b, float c)
+    public (float, float) RunNetwork(float[] inputs)
     {
-        inputLayer[0, 0] = a;
-        inputLayer[0, 1] = b;
-        inputLayer[0, 2] = c;
+        for (int i = 0; i < inputs.Length; i++)
+        {
+            inputLayer[0, i] = inputs[i];
+        }
 
         inputLayer = inputLayer.PointwiseTanh();
+        
 
         hiddenLayers[0] = ((inputLayer * weights[0]) + biases[0]).PointwiseTanh();
 
@@ -142,15 +138,31 @@ public class NNet : MonoBehaviour
             hiddenLayers[i] = ((hiddenLayers[i - 1] * weights[i]) + biases[i]).PointwiseTanh();
         }
 
-        outputLayer = ((hiddenLayers[hiddenLayers.Count-1]*weights[weights.Count-1])+biases[biases.Count-1]).PointwiseTanh();
+        outputLayer = ((hiddenLayers[^1]*weights[^1])+biases[^1]).PointwiseTanh();
 
         //First output is acceleration and second output is steering
-        return (Sigmoid(outputLayer[0,0]), (float)Math.Tanh(outputLayer[0,1]));
+        return ((float)Math.Tanh(outputLayer[0,0]), (float)Math.Tanh(outputLayer[0,1]));
     }
 
     private float Sigmoid(float s)
     {
         return (1 / (1 + Mathf.Exp(-s)));
+    }
+
+    private Matrix<float> SigmoidMatrix(Matrix<float> mat)
+    {
+        var temp = Matrix<float>.Build.Dense(mat.RowCount, mat.ColumnCount);
+        mat.CopyTo(temp);
+        
+        for (int x= 0; x < temp.RowCount; x++)
+        {
+            for (int y = 0; y < temp.ColumnCount; y++)
+            {
+                temp[x, y] = Sigmoid(temp[x, y]);
+            }
+        }
+
+        return temp;
     }
 
 }

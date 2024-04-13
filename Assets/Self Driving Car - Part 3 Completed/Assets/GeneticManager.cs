@@ -1,20 +1,21 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 using MathNet.Numerics.LinearAlgebra;
+using Random = UnityEngine.Random;
 
 public class GeneticManager : MonoBehaviour
 {
-    [Header("References")]
-    public CarControllerSDC controller;
+    private CarControllerSDC controller;
 
     [Header("Controls")]
     public int initialPopulation = 85;
     [Range(0.0f, 1.0f)]
     public float mutationRate = 0.055f;
 
-    [Header("Crossover Controls")]
+    [Header("Crossover Controls")] 
     public int bestAgentSelection = 8;
     public int worstAgentSelection = 3;
     public int numberToCrossover;
@@ -28,6 +29,11 @@ public class GeneticManager : MonoBehaviour
     [Header("Public View")]
     public int currentGeneration;
     public int currentGenome = 0;
+
+    private void Awake()
+    {
+        controller = GetComponent<CarControllerSDC>();
+    }
 
     private void Start()
     {
@@ -80,7 +86,7 @@ public class GeneticManager : MonoBehaviour
         genePool.Clear();
         currentGeneration++;
         naturallySelected = 0;
-        SortPopulation();
+        Array.Sort(population, (o1, o2) => o1.fitness.CompareTo(o2.fitness));
 
         NNet[] newPopulation = PickBestPopulation();
 
@@ -100,7 +106,7 @@ public class GeneticManager : MonoBehaviour
     private void Mutate(NNet[] newPopulation)
     {
 
-        for (int i = 0; i < naturallySelected; i++)
+        for (int i = bestAgentSelection; i < naturallySelected; i++)
         {
 
             for (int c = 0; c < newPopulation[i].weights.Count; c++)
@@ -242,23 +248,6 @@ public class GeneticManager : MonoBehaviour
         }
 
         return newPopulation;
-
-    }
-
-    private void SortPopulation()
-    {
-        for (int i = 0; i < population.Length; i++)
-        {
-            for (int j = i; j < population.Length; j++)
-            {
-                if (population[i].fitness < population[j].fitness)
-                {
-                    NNet temp = population[i];
-                    population[i] = population[j];
-                    population[j] = temp;
-                }
-            }
-        }
 
     }
 }
