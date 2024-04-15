@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class CarControllerRealistic : MonoBehaviour
 {
-    
+    public bool isAI = false;
     public Wheel[] wheels;
     public float motorPower;
     public float brakePower;
@@ -22,6 +22,7 @@ public class CarControllerRealistic : MonoBehaviour
     private bool _handBrakeInput;
     private float _speed;
     private float _slipAngle;
+    private bool respawned = false;
 
     private Rigidbody rb;
 
@@ -39,11 +40,37 @@ public class CarControllerRealistic : MonoBehaviour
         }
     }
 
+    public void Reset()
+    {
+        rb.velocity = new Vector3(0, 0, 0);
+        rb.angularVelocity = new Vector3(0, 0, 0);
+
+        respawned = true;
+    }
+
     // Update is called once per frame
     void Update()
     {
         CheckInput();
         UpdateWheel();
+    }
+
+    private void FixedUpdate()
+    {
+        if(respawned)
+        {
+            foreach (var wheel in wheels)
+            {
+                wheel.coll.brakeTorque = Mathf.Infinity;
+            }
+            rb.isKinematic = true;
+            respawned = false;
+        }
+        else
+        {
+            rb.isKinematic = false;
+        }
+
     }
 
     private void UpdateWheel()
@@ -68,12 +95,31 @@ public class CarControllerRealistic : MonoBehaviour
 
     private void CheckInput()
     {
+        if (isAI) return;
         _gasInput = Input.GetAxis("Vertical");
         _steerInput = Input.GetAxis("Horizontal");
         _slipAngle = Vector3.Angle(transform.forward, rb.velocity - transform.forward);
         _handBrakeInput = Input.GetButton("Fire1");
 
         if(_slipAngle < 120)
+        {
+            if (_gasInput < 0)
+            {
+                _brakeInput = Mathf.Abs(_gasInput);
+                _gasInput = 0;
+            }
+            else _brakeInput = 0;
+        }
+        else _brakeInput = 0;
+    }
+
+    public void SetInputs(float vertical, float horizontal)
+    {
+        _slipAngle = Vector3.Angle(transform.forward, rb.velocity - transform.forward);
+        _gasInput = vertical;
+        _steerInput = horizontal;
+
+        if (_slipAngle < 120)
         {
             if (_gasInput < 0)
             {

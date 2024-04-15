@@ -141,7 +141,7 @@ public class NNet
         outputLayer = ((hiddenLayers[^1]*weights[^1])+biases[^1]).PointwiseTanh();
 
         //First output is acceleration and second output is steering
-        return ((float)Math.Tanh(outputLayer[0,0]), (float)Math.Tanh(outputLayer[0,1]));
+        return (Sigmoid(outputLayer[0,0]), (float)Math.Tanh(outputLayer[0,1]));
     }
 
     private float Sigmoid(float s)
