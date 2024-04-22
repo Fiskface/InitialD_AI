@@ -1,7 +1,10 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Dreamteck.Splines;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class CarControllerSDC : MonoBehaviour
 {
@@ -22,12 +25,14 @@ public class CarControllerSDC : MonoBehaviour
     public int angle = 180;
     public Transform raycastStartPos;
     public LayerMask layerMask;
+    public bool loadFileOnStart;
+    private SplineProjector splineProjector;
 
     [Header("Fitness")]
     public float overallFitness;
-    public float distanceMultipler = 1.4f;
-    public float startDistanceMultipler = 1.4f;
+    public float splinePercentMultiplier = 1.4f;
     public float avgSpeedMultiplier = 0.2f;
+    public float reachedGoalFitnessGain = 2000;
 
     [Header("Network Options")]
     public int LAYERS = 1;
@@ -36,6 +41,8 @@ public class CarControllerSDC : MonoBehaviour
     private Vector3 lastPosition;
     private float totalDistanceTravelled;
     private float avgSpeed;
+
+    [NonSerialized] public bool reachedGoal = false;
 
     private Rigidbody rb;
 
@@ -46,10 +53,17 @@ public class CarControllerSDC : MonoBehaviour
         startRotation = transform.eulerAngles;
         geneticManager = GetComponent<GeneticManager>();
         rb = GetComponent<Rigidbody>();
+        splineProjector = GetComponent<SplineProjector>();
 
         inputs = new float[raycastAmount + 1];
         NNet.inputs = inputs.Length;
         carController = GetComponent<CarControllerRealistic>();
+
+        if (loadFileOnStart)
+        {
+            var saved = GeneticManager.DeserializeFromFile<NNet>();
+            if (saved != null) network = saved;
+        }
     }
 
     public void ResetWithNetwork (NNet net)
@@ -58,8 +72,8 @@ public class CarControllerSDC : MonoBehaviour
         Reset();
     }
     
-    public void Reset() {
-
+    public void Reset() 
+    {
         timeSinceStart = 0f;
         totalDistanceTravelled = 0f;
         avgSpeed = 0f;
@@ -67,6 +81,7 @@ public class CarControllerSDC : MonoBehaviour
         overallFitness = 0f;
         transform.position = startPosition;
         transform.eulerAngles = startRotation;
+        reachedGoal = false;
 
         carController.Reset();
     }
@@ -88,6 +103,7 @@ public class CarControllerSDC : MonoBehaviour
 
     private void Death()
     {
+        if (loadFileOnStart) return;
         geneticManager.Death(overallFitness, network);
     }
 
@@ -95,11 +111,11 @@ public class CarControllerSDC : MonoBehaviour
     {
         totalDistanceTravelled += Vector3.Distance(transform.position,lastPosition);
         avgSpeed = totalDistanceTravelled/timeSinceStart;
-
-       overallFitness = (totalDistanceTravelled*distanceMultipler)+(avgSpeed*avgSpeedMultiplier)+(Vector3.Distance(transform.position, startPosition)*startDistanceMultipler);
-
-       if (timeSinceStart >= 3 && timeSinceStart > overallFitness / 3.5f) Death();
         
+        overallFitness = avgSpeed * avgSpeedMultiplier;
+        overallFitness += (float)splineProjector.GetPercent() * splinePercentMultiplier;
+       if (reachedGoal) overallFitness += reachedGoalFitnessGain;
+       if (timeSinceStart >= 3 && timeSinceStart > overallFitness / 3.5f) Death();
     }
 
     private void InputSensors()
@@ -126,7 +142,11 @@ public class CarControllerSDC : MonoBehaviour
 
         speedSensor = rb.velocity.magnitude;
         inputs[^1] = speedSensor;
-
-        //movementAngleSensor = transform.fo
     }
+    
+    private void OnCollisionEnter(Collision collision) 
+    {
+        Death();
+    }
+
 }

@@ -57,11 +57,18 @@ public class GeneticManager : MonoBehaviour
 
     private void FillPopulationWithRandomValues(NNet[] newPopulation, int startingIndex)
     {
-        while (startingIndex < initialPopulation)
+        while (startingIndex < initialPopulation - 1)
         {
             newPopulation[startingIndex] = new NNet();
             newPopulation[startingIndex].Initialise(controller.LAYERS, controller.NEURONS);
             startingIndex++;
+        }
+        var saved = DeserializeFromFile<NNet>();
+        if (saved != null) newPopulation[startingIndex] = saved;
+        else
+        {
+            newPopulation[startingIndex] = new NNet();
+            newPopulation[startingIndex].Initialise(controller.LAYERS, controller.NEURONS);
         }
     }
 
@@ -93,6 +100,7 @@ public class GeneticManager : MonoBehaviour
         NNet saved = DeserializeFromFile<NNet>();
         if (saved == null || saved.fitness < population[0].fitness)
         {
+            Debug.Log(population[0].fitness);
             SerializeToFile(population[0]);
         }
 
@@ -266,7 +274,7 @@ public class GeneticManager : MonoBehaviour
         }
     }
     
-    static T DeserializeFromFile<T>()
+    public static T DeserializeFromFile<T>()
     {
         if (!File.Exists(filePath)) return default(T);
         using (FileStream fs = new FileStream(filePath, FileMode.Open))
