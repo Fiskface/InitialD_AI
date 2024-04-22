@@ -11,8 +11,10 @@ public class Goal : MonoBehaviour
         {
             if (car.isAI)
             {
-                Debug.Log("You lose!");
-                other.transform.parent.parent.GetComponent<CarControllerSDC>().reachedGoal = true;
+                //Debug.Log("You lose!");
+                var a = other.transform.parent.parent.GetComponent<CarControllerSDC>();
+                a.reachedGoal = true;
+                Debug.Log($"{a.geneticManager.filePath}: {a.timeSinceStart}");
             }
             else
             {

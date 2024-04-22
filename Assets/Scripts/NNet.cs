@@ -9,9 +9,7 @@ using Random = UnityEngine.Random;
 [Serializable]
 public class NNet
 {
-    public static int inputs = 3;
-    
-    private Matrix<float> inputLayer = Matrix<float>.Build.Dense(1, inputs);
+    private Matrix<float> inputLayer;
 
     private List<Matrix<float>> hiddenLayers = new List<Matrix<float>>();
 
@@ -21,8 +19,10 @@ public class NNet
 
     public float fitness;
 
-    public void Initialise(int hiddenLayerCount, int hiddenNeuronCount)
+    public void Initialise(int hiddenLayerCount, int hiddenNeuronCount, int inputs)
     {
+        inputLayer = Matrix<float>.Build.Dense(1, inputs);
+        
         inputLayer.Clear();
         hiddenLayers.Clear();
         outputLayer.Clear();

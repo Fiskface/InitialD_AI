@@ -10,7 +10,7 @@ public class CarControllerSDC : MonoBehaviour
 {
     private Vector3 startPosition, startRotation;
     private NNet network;
-    private GeneticManager geneticManager;
+    [NonSerialized] public GeneticManager geneticManager;
     private CarControllerRealistic carController;
 
     [Range(-1f,1f)]
@@ -46,7 +46,7 @@ public class CarControllerSDC : MonoBehaviour
 
     private Rigidbody rb;
 
-    private float[] inputs;
+    [NonSerialized] public float[] inputs;
 
     private void Awake() {
         startPosition = transform.position;
@@ -56,12 +56,11 @@ public class CarControllerSDC : MonoBehaviour
         splineProjector = GetComponent<SplineProjector>();
 
         inputs = new float[raycastAmount + 1];
-        NNet.inputs = inputs.Length;
         carController = GetComponent<CarControllerRealistic>();
 
         if (loadFileOnStart)
         {
-            var saved = GeneticManager.DeserializeFromFile<NNet>();
+            var saved = GeneticManager.DeserializeFromFile<NNet>(geneticManager.filePath);
             if (saved != null) network = saved;
         }
     }
@@ -126,11 +125,11 @@ public class CarControllerSDC : MonoBehaviour
 
     private void InputSensors()
     {
-        float anglePerAmount = angle / (raycastAmount - 1);
+        float anglePerAmount = angle / (raycastAmount - 1f);
         for (int i = 0; i < raycastAmount; i++)
         {
             Vector3 direction = Quaternion.AngleAxis(-(float)angle * 0.5f + anglePerAmount * (float)i, Vector3.up) * Vector3.forward;
-            direction = transform.TransformDirection(direction);
+            direction = Quaternion.Euler(0, transform.rotation.eulerAngles.y, 0) * direction;
             
             Ray r = new Ray(raycastStartPos.position, direction);
             RaycastHit hit;

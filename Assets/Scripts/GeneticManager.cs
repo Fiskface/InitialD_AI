@@ -27,7 +27,7 @@ public class GeneticManager : MonoBehaviour
     private int naturallySelected;
 
     private NNet[] population;
-    private static string filePath = "SavedNeuralNet";
+    public string filePath = "SavedNeuralNet15";
 
     [Header("Public View")]
     public int currentGeneration;
@@ -60,15 +60,15 @@ public class GeneticManager : MonoBehaviour
         while (startingIndex < initialPopulation - 1)
         {
             newPopulation[startingIndex] = new NNet();
-            newPopulation[startingIndex].Initialise(controller.LAYERS, controller.NEURONS);
+            newPopulation[startingIndex].Initialise(controller.LAYERS, controller.NEURONS, controller.inputs.Length);
             startingIndex++;
         }
-        var saved = DeserializeFromFile<NNet>();
+        var saved = DeserializeFromFile<NNet>(filePath);
         if (saved != null) newPopulation[startingIndex] = saved;
         else
         {
             newPopulation[startingIndex] = new NNet();
-            newPopulation[startingIndex].Initialise(controller.LAYERS, controller.NEURONS);
+            newPopulation[startingIndex].Initialise(controller.LAYERS, controller.NEURONS, controller.inputs.Length);
         }
     }
 
@@ -97,11 +97,11 @@ public class GeneticManager : MonoBehaviour
         naturallySelected = 0;
         Array.Sort(population, (o1, o2) => o2.fitness.CompareTo(o1.fitness));
         
-        NNet saved = DeserializeFromFile<NNet>();
+        NNet saved = DeserializeFromFile<NNet>(filePath);
         if (saved == null || saved.fitness < population[0].fitness)
         {
             Debug.Log(population[0].fitness);
-            SerializeToFile(population[0]);
+            SerializeToFile(population[0], filePath);
         }
 
         NNet[] newPopulation = PickBestPopulation();
@@ -178,8 +178,8 @@ public class GeneticManager : MonoBehaviour
             NNet Child1 = new NNet();
             NNet Child2 = new NNet();
 
-            Child1.Initialise(controller.LAYERS, controller.NEURONS);
-            Child2.Initialise(controller.LAYERS, controller.NEURONS);
+            Child1.Initialise(controller.LAYERS, controller.NEURONS, controller.inputs.Length);
+            Child2.Initialise(controller.LAYERS, controller.NEURONS, controller.inputs.Length);
 
             Child1.fitness = 0;
             Child2.fitness = 0;
@@ -246,7 +246,7 @@ public class GeneticManager : MonoBehaviour
         return newPopulation;
     }
     
-    static void SerializeToFile<T>(T obj)
+    static void SerializeToFile<T>(T obj, string filePath)
     {
         using (FileStream fs = new FileStream(filePath, FileMode.Create))
         {
@@ -255,7 +255,7 @@ public class GeneticManager : MonoBehaviour
         }
     }
     
-    public static T DeserializeFromFile<T>()
+    public static T DeserializeFromFile<T>(string filePath)
     {
         if (!File.Exists(filePath)) return default(T);
         using (FileStream fs = new FileStream(filePath, FileMode.Open))
