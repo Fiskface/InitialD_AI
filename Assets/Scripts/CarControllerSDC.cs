@@ -131,12 +131,8 @@ public class CarControllerSDC : MonoBehaviour
 
             if (Physics.Raycast(r, out hit, float.MaxValue, layerMask))
             {
-                inputs[i] = hit.distance / 40;
+                inputs[i] = hit.distance;
                 Debug.DrawLine(r.origin, hit.point, Color.red);
-            }
-            else
-            {
-                inputs[i] = 1;
             }
         }
 

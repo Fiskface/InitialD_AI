@@ -121,10 +121,8 @@ public class GeneticManager : MonoBehaviour
 
     private void Mutate(NNet[] newPopulation)
     {
-
-        for (int i = bestAgentSelection; i < naturallySelected; i++)
+        for (int i = 0; i < naturallySelected; i++)
         {
-
             for (int c = 0; c < newPopulation[i].weights.Count; c++)
             {
 
@@ -199,23 +197,6 @@ public class GeneticManager : MonoBehaviour
                 {
                     Child2.weights[w] = population[AIndex].weights[w];
                     Child1.weights[w] = population[BIndex].weights[w];
-                }
-
-            }
-
-
-            for (int w = 0; w < Child1.biases.Count; w++)
-            {
-
-                if (Random.Range(0.0f, 1.0f) < 0.5f)
-                {
-                    Child1.biases[w] = population[AIndex].biases[w];
-                    Child2.biases[w] = population[BIndex].biases[w];
-                }
-                else
-                {
-                    Child2.biases[w] = population[AIndex].biases[w];
-                    Child1.biases[w] = population[BIndex].biases[w];
                 }
 
             }

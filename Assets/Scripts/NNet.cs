@@ -19,8 +19,6 @@ public class NNet
 
     public List<Matrix<float>> weights = new List<Matrix<float>>();
 
-    public List<float> biases = new List<float>();
-
     public float fitness;
 
     public void Initialise(int hiddenLayerCount, int hiddenNeuronCount)
@@ -29,7 +27,6 @@ public class NNet
         hiddenLayers.Clear();
         outputLayer.Clear();
         weights.Clear();
-        biases.Clear();
 
         for (int i = 0; i < hiddenLayerCount + 1; i++)
         {
@@ -37,8 +34,6 @@ public class NNet
             Matrix<float> f = Matrix<float>.Build.Dense(1, hiddenNeuronCount);
 
             hiddenLayers.Add(f);
-
-            biases.Add(Random.Range(-1f, 1f));
 
             //WEIGHTS
             if (i == 0)
@@ -54,7 +49,6 @@ public class NNet
 
         Matrix<float> OutputWeight = Matrix<float>.Build.Dense(hiddenNeuronCount, 2);
         weights.Add(OutputWeight);
-        biases.Add(Random.Range(-1f, 1f));
 
         RandomiseWeights();
 
@@ -84,10 +78,7 @@ public class NNet
 
         List<float> newBiases = new List<float>();
 
-        newBiases.AddRange(biases);
-
         n.weights = newWeights;
-        n.biases = newBiases;
 
         n.InitialiseHidden(hiddenLayerCount, hiddenNeuronCount);
 
@@ -132,14 +123,14 @@ public class NNet
         inputLayer = inputLayer.PointwiseTanh();
         
 
-        hiddenLayers[0] = ((inputLayer * weights[0]) + biases[0]).PointwiseTanh();
+        hiddenLayers[0] = (inputLayer * weights[0]).PointwiseTanh();
 
         for (int i = 1; i < hiddenLayers.Count; i++)
         {
-            hiddenLayers[i] = ((hiddenLayers[i - 1] * weights[i]) + biases[i]).PointwiseTanh();
+            hiddenLayers[i] = (hiddenLayers[i - 1] * weights[i]).PointwiseTanh();
         }
 
-        outputLayer = ((hiddenLayers[^1]*weights[^1])+biases[^1]).PointwiseTanh();
+        outputLayer = (hiddenLayers[^1]*weights[^1]).PointwiseTanh();
 
         //First output is acceleration and second output is steering
         return ((float)Math.Tanh(outputLayer[0,0]), (float)Math.Tanh(outputLayer[0,1]));
