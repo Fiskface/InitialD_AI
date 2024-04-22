@@ -114,8 +114,14 @@ public class CarControllerSDC : MonoBehaviour
         
         overallFitness = avgSpeed * avgSpeedMultiplier;
         overallFitness += (float)splineProjector.GetPercent() * splinePercentMultiplier;
-       if (reachedGoal) overallFitness += reachedGoalFitnessGain;
-       if (timeSinceStart >= 3 && timeSinceStart > overallFitness / 3.5f) Death();
+        
+        if (reachedGoal)
+        {
+            overallFitness += reachedGoalFitnessGain;
+            Death();
+        }
+        
+        if (timeSinceStart >= 3 && timeSinceStart > overallFitness / 20) Death();
     }
 
     private void InputSensors()
@@ -131,12 +137,16 @@ public class CarControllerSDC : MonoBehaviour
 
             if (Physics.Raycast(r, out hit, float.MaxValue, layerMask))
             {
-                inputs[i] = hit.distance;
+                inputs[i] = hit.distance / 30;
                 Debug.DrawLine(r.origin, hit.point, Color.red);
+            }
+            else
+            {
+                inputs[i] = 1;
             }
         }
 
-        speedSensor = rb.velocity.magnitude;
+        speedSensor = rb.velocity.magnitude / 10;
         inputs[^1] = speedSensor;
     }
     

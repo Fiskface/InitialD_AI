@@ -7,12 +7,12 @@ public class Goal : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other)
     {
-        if(other.TryGetComponent<CarControllerRealistic>(out CarControllerRealistic car))
+        if(other.transform.parent.parent.TryGetComponent<CarControllerRealistic>(out CarControllerRealistic car))
         {
             if (car.isAI)
             {
                 Debug.Log("You lose!");
-                other.GetComponent<CarControllerSDC>().reachedGoal = true;
+                other.transform.parent.parent.GetComponent<CarControllerSDC>().reachedGoal = true;
             }
             else
             {

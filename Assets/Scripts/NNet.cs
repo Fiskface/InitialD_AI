@@ -136,7 +136,7 @@ public class NNet
         return ((float)Math.Tanh(outputLayer[0,0]), (float)Math.Tanh(outputLayer[0,1]));
     }
 
-    private float Sigmoid(float s)
+    public static float Sigmoid(float s)
     {
         return (1 / (1 + Mathf.Exp(-s)));
     }
