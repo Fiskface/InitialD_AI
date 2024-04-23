@@ -123,7 +123,7 @@ public class CarControllerSDC : MonoBehaviour
         overallFitness = avgSpeed * avgSpeedMultiplier;
         overallFitness += (float)splineProjector.GetPercent() * splinePercentMultiplier;
         
-        if (timeSinceStart >= 3 && timeSinceStart > overallFitness / 10) Death();
+        if (timeSinceStart >= 3 && timeSinceStart > overallFitness / 5) Death();
     }
 
     private void InputSensors()
