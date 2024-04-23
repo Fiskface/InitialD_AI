@@ -74,13 +74,19 @@ public class GeneticManager : MonoBehaviour
 
     public void Death(float fitness, NNet network)
     {
+        network.fitness = fitness;
+        
+        NNet saved = DeserializeFromFile<NNet>(filePath);
+        if (saved == null || saved.fitness < network.fitness)
+        {
+            Debug.Log($"{filePath} best fitness: {network.fitness}");
+            SerializeToFile(network, filePath); 
+        }
+        
         if (currentGenome < population.Length -1)
         {
-
-            population[currentGenome].fitness = fitness;
             currentGenome++;
             ResetToCurrentGenome();
-
         }
         else
         {
@@ -96,13 +102,6 @@ public class GeneticManager : MonoBehaviour
         currentGeneration++;
         naturallySelected = 0;
         Array.Sort(population, (o1, o2) => o2.fitness.CompareTo(o1.fitness));
-        
-        NNet saved = DeserializeFromFile<NNet>(filePath);
-        if (saved == null || saved.fitness < population[0].fitness)
-        {
-            Debug.Log(population[0].fitness);
-            SerializeToFile(population[0], filePath);
-        }
 
         NNet[] newPopulation = PickBestPopulation();
 

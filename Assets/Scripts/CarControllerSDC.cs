@@ -108,19 +108,22 @@ public class CarControllerSDC : MonoBehaviour
 
     private void CalculateFitness() 
     {
+        if (reachedGoal)
+        {
+            overallFitness = splinePercentMultiplier;
+            overallFitness += reachedGoalFitnessGain;
+            overallFitness -= timeSinceStart;
+            Death();
+            return;
+        }
+        
         totalDistanceTravelled += Vector3.Distance(transform.position,lastPosition);
         avgSpeed = totalDistanceTravelled/timeSinceStart;
         
         overallFitness = avgSpeed * avgSpeedMultiplier;
         overallFitness += (float)splineProjector.GetPercent() * splinePercentMultiplier;
         
-        if (reachedGoal)
-        {
-            overallFitness += reachedGoalFitnessGain;
-            Death();
-        }
-        
-        if (timeSinceStart >= 3 && timeSinceStart > overallFitness / 20) Death();
+        if (timeSinceStart >= 3 && timeSinceStart > overallFitness / 10) Death();
     }
 
     private void InputSensors()

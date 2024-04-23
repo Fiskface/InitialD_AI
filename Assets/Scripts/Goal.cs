@@ -14,7 +14,7 @@ public class Goal : MonoBehaviour
                 //Debug.Log("You lose!");
                 var a = other.transform.parent.parent.GetComponent<CarControllerSDC>();
                 a.reachedGoal = true;
-                Debug.Log($"{a.geneticManager.filePath}: {a.timeSinceStart}");
+                Debug.Log($"{a.geneticManager.filePath}: reached goal in {a.timeSinceStart}");
             }
             else
             {
